@@ -2,6 +2,7 @@ services:
   
   postgres:
     image: "postgres:14.0"
+    container_name : "micro_db"
     ports:
       - "5433:5432"
     restart: always
@@ -17,6 +18,7 @@ services:
       
       
   broker-services:
+    container_name : "micro_broker"
     build:
       context: ./../broker
       dockerfile: ./../broker/broker-service.dockerfile
@@ -30,6 +32,7 @@ services:
 
 
   authentication-service:
+    container_name : "micro_authentication"
     build:
       context: ../authentication
       dockerfile: ../authentication/authentication-service.dockerfile
@@ -40,7 +43,7 @@ services:
       mode: replicated
       replicas: 1
     environment:
-      DSN : "host=posstgres port=5432 user=postgres password=password dbname=users sslmode=disable timezon=UTC connect_timeout=5"
+      DSN : "host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable timezone=UTC connect_timeout=5"
 
   frontend-service:
     build:
@@ -49,3 +52,4 @@ services:
     ports:
       - "3002:3002"
     restart: always
+

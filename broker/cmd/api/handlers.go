@@ -32,7 +32,6 @@ func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
 
 func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 	var requestPayload RequestPayload
-	fmt.Println(w, r, r.Body)
 	err := app.readJSON(w, r, &requestPayload)
 
 	if err != nil {
@@ -52,7 +51,7 @@ func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 	jsonData, _ := json.MarshalIndent(a, "", "\t")
 
-	request, err := http.NewRequest("POST", "http://authentication-service/authenticate", bytes.NewReader(jsonData))
+	request, err := http.NewRequest("POST", "http://authentication-service:3003/authenticate", bytes.NewReader(jsonData))
 	if err != nil {
 		log.Panic(err)
 		return
@@ -76,7 +75,7 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 
 	var jsonFromService jsonResponse
 
-	err = json.NewDecoder(response.Body).Decode(jsonFromService)
+	err = json.NewDecoder(response.Body).Decode(&jsonFromService)
 	if err != nil {
 		app.errorJSON(w, err)
 		return

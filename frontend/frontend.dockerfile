@@ -1,5 +1,5 @@
 #base go image
-FROM golang:1.23-alpine as builder
+FROM golang:1.23-alpine
 
 RUN mkdir /app
 
@@ -17,12 +17,5 @@ RUN CGO_ENABLED=0 go build -o frontendApp ./cmd/web
 
 RUN chmod +x /app/frontendApp
 
-FROM alpine:latest
 
-RUN mkdir /app
-
-COPY --from=builder /app/frontendApp /app
-RUN mkdir -p /app/cmd/web/templates
-COPY --from=builder /app/cmd/web/templates /app/cmd/web/templates
-
-CMD ["/app/frontendApp"]
+CMD ["./frontendApp"]
