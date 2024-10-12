@@ -1,8 +1,21 @@
 package main
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+	"github.com/bhusal-rj/authentication/cmd/data"
+	_ "github.com/jackc/pgconn"
+	_ "github.com/jackc/pgx/v4"
+	_ "github.com/jackc/pgx/v4/stdlib"
+	"log"
+	"net/http"
+	"os"
+	"time"
+)
 
 const webPort = "3003"
+
+var counts int64
 
 type Config struct {
 	DB     *sql.DB
@@ -11,4 +24,61 @@ type Config struct {
 
 func main() {
 
+	log.Println("Starting the authentication service")
+
+	conn := connectDB()
+	if conn == nil {
+		log.Panic("Cannot connect to postgres")
+	}
+	app := Config{
+		DB:     conn,
+		Models: data.New(conn),
+	}
+
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", webPort),
+		Handler: app.routes(),
+	}
+	err := srv.ListenAndServe()
+
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+
+}
+
+func connectDB() *sql.DB {
+	dsn := os.Getenv("DSN")
+	for {
+		connection, err := openDB(dsn)
+		if err != nil {
+			log.Println("Error connection to database")
+			counts++
+		} else {
+			log.Println("Connected to postgres")
+			return connection
+		}
+
+		if counts > 10 {
+			log.Println("err")
+			return nil
+		}
+		log.Println("Backing off for 5 seconds....")
+		time.Sleep(5 * time.Second)
+		continue
+	}
 }

@@ -1,5 +1,21 @@
 services:
   
+  postgres:
+    image: "postgres:14.0"
+    ports:
+      - "5433:5432"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users
+    volumes:
+      - ./db-data/postgres/:/var/lib/postgresql/data/
+      
+      
   broker-services:
     build:
       context: ./../broker
@@ -7,7 +23,21 @@ services:
     restart: always
     ports:
       - "3004:3004"
-
+    
     deploy:
       mode: replicated
       replicas: 1
+
+
+  authentication-service:
+    build:
+      context: ../authentication
+      dockerfile: ../authentication/authentication-service.dockerfile
+    ports:
+      - "3003:3003"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      DSN : "host=posstgres port=5432 user=postgres password=password dbname=users sslmode=disable timezon=UTC connect_timeout=5"
