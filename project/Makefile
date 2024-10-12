@@ -2,7 +2,7 @@ FRONT_END_BINARY=frontApp
 BROKER_BINARY=brokerApp
 
 #builds the dockerfiles present in the project as well
-up:
+up: up_build
 	@echo "Starting Docker images"
 	docker compose up -d
 	echo "Docker images started"

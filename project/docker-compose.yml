@@ -48,3 +48,4 @@ services:
       dockerfile: ../frontend/frontend.dockerfile
     ports:
       - "3002:3002"
+    restart: always
