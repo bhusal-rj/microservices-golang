@@ -41,3 +41,10 @@ services:
       replicas: 1
     environment:
       DSN : "host=posstgres port=5432 user=postgres password=password dbname=users sslmode=disable timezon=UTC connect_timeout=5"
+
+  frontend-service:
+    build:
+      context: ../frontend
+      dockerfile: ../frontend/frontend.dockerfile
+    ports:
+      - "3002:3002"

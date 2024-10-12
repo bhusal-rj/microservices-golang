@@ -1,6 +1,7 @@
 FRONT_END_BINARY=frontApp
 BROKER_BINARY=brokerApp
 
+#builds the dockerfiles present in the project as well
 up:
 	@echo "Starting Docker images"
 	docker compose up -d
@@ -28,8 +29,9 @@ build_frontend: up
 	cd ../frontend/ && env CGO_ENABLED=0 go build -o ${FRONT_END_BINARY} ./cmd/web
 	@echo "Done!"
 
-start: build_frontend
-	@echo "Starting the frontend"
-	cd ../frontend && ./${FRONT_END_BINARY} 
+start: up
+	@echo "Starting the microservice"
+	# cd ../frontend && ./${FRONT_END_BINARY} 
+	@echo "Done!"
 
 
