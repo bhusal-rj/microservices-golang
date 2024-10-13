@@ -17,7 +17,7 @@ var client *mongo.Client
 func New(mongo *mongo.Client) Models {
 	client = mongo
 	return Models{
-		LogEntry: LogEntry(),
+		LogEntry: LogEntry{},
 	}
 }
 
