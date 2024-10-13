@@ -22,7 +22,7 @@ const (
 	webPort = "80"
 	rpcPort = "5001"
 	//connection_string in the form mongodb://username:password@host:port
-	mongoURL = "mongodb://admin:password@localhost:27017"
+	mongoURL = "mongodb://admin:password@mongo:27017/logs?authSource=admin"
 	gRpcPort = "50001"
 )
 
@@ -51,7 +51,7 @@ func main() {
 
 	log.Print("Mongodb connection successful")
 	app := Config{
-		Models: data.New(client),
+		Models: data.New(mongoClient),
 	}
 
 	app.serve()

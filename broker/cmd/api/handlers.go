@@ -106,7 +106,7 @@ func (app *Config) authenticate(w http.ResponseWriter, a AuthPayload) {
 func (app *Config) logItem(w http.ResponseWriter, l LogPayload) {
 	jsonData, _ := json.Marshal(l)
 
-	logServiceURL := "http://logger-service:3001/log"
+	logServiceURL := "http://logger-service/log"
 
 	request, err := http.NewRequest("POST", logServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
