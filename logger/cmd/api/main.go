@@ -22,7 +22,7 @@ const (
 	webPort = "80"
 	rpcPort = "5001"
 	//connection_string in the form mongodb://username:password@host:port
-	mongoURL = "mongodb://admin:password@mongo:27017"
+	mongoURL = "mongodb://admin:password@localhost:27017"
 	gRpcPort = "50001"
 )
 
@@ -48,11 +48,13 @@ func main() {
 			panic(err)
 		}
 	}()
+
+	log.Print("Mongodb connection successful")
 	app := Config{
 		Models: data.New(client),
 	}
-	go app.serve()
-	log.Print("Mongodb connection successful")
+
+	app.serve()
 }
 
 func (app *Config) serve() {
@@ -60,13 +62,12 @@ func (app *Config) serve() {
 		Addr:    fmt.Sprintf(":%s", webPort),
 		Handler: app.route(),
 	}
+	log.Print("Logger service is up and running")
 	err := srv.ListenAndServe()
 
 	if err != nil {
-		log.Panic()
+		log.Panic(err)
 	}
-
-	fmt.Println("Logger service is up and running")
 
 }
 

@@ -15,6 +15,17 @@ services:
       POSTGRES_DB: users
     volumes:
       - ./db-data/postgres/:/var/lib/postgresql/data/
+
+  mongo:
+    image: "mongo:4.2.16-bionic"
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: logs
+      MONGO_INITDB_USERNAME: admin
+      MONGO_INITDB_PASSWORD: password
+    volumes:
+      - ./db-data/mongodb/:/data/db
       
       
   broker-services:
@@ -52,4 +63,18 @@ services:
     ports:
       - "3002:3002"
     restart: always
+
+  logger-service:
+    container_name : "micro_logger"
+    build:
+      context: ../logger
+      dockerfile: ../logger/logger-service.dockerfile
+    ports:
+      - "3001:80"
+    restart: always
+    depends_on:
+      - mongo
+    deploy:
+      mode: replicated
+      replicas: 1
 
