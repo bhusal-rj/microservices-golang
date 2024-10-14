@@ -13,6 +13,7 @@ type RequestPayload struct {
 	Action string      `json:"action"`
 	Auth   AuthPayload `json:"auth,omitempty"`
 	Log    LogPayload  `json:"log,omitempty"`
+	Mail   MailPayload `json:"mail,omiempty"`
 }
 
 type AuthPayload struct {
@@ -23,6 +24,13 @@ type AuthPayload struct {
 type LogPayload struct {
 	Name string `json:"name"`
 	Data string `json:"data"`
+}
+
+type MailPayload struct {
+	To      string `json:"to"`
+	From    string `json:"from"`
+	Subject string `json:"subject"`
+	Message string `json:"message"`
 }
 
 func (app *Config) Broker(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +59,8 @@ func (app *Config) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 		break
 	case "log":
 		app.logItem(w, requestPayload.Log)
+	case "mail":
+		app.sendMail(w, requestPayload.Mail)
 	default:
 		app.errorJSON(w, errors.New("unknown action"))
 	}
@@ -135,4 +145,45 @@ func (app *Config) logItem(w http.ResponseWriter, l LogPayload) {
 	payload.Message = "logged"
 	app.writeJSON(w, http.StatusAccepted, payload)
 
+}
+
+func (app *Config) sendMail(w http.ResponseWriter, msg MailPayload) {
+	jsonData, _ := json.Marshal(msg)
+	mailServiceURL := "http://mailer-service/send"
+	//create the request
+
+	request, err := http.NewRequest("POST", mailServiceURL, bytes.NewBuffer(jsonData))
+
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	client := &http.Client{}
+	respose, err := client.Do(request)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+	//ensure that the body is closed
+	defer respose.Body.Close()
+
+	var response jsonResponse
+	err = json.NewDecoder(respose.Body).Decode(&response)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	if respose.StatusCode != http.StatusAccepted {
+		//get the message
+		app.errorJSON(w, errors.New("This is an error"), respose.StatusCode)
+		return
+	}
+
+	//put the data into the response payload
+	var responsePayload jsonResponse
+	responsePayload.Error = false
+	responsePayload.Message = "Message has been sent successfully"
+	app.writeJSON(w, http.StatusAccepted, responsePayload)
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -63,6 +64,7 @@ func (app *Config) writeJSON(w http.ResponseWriter, status int, data any, header
 }
 
 func (app *Config) errorJSON(w http.ResponseWriter, err error, status ...int) error {
+	fmt.Println(err.Error(), "There is an error")
 	statusCode := http.StatusBadRequest
 	if len(status) > 0 {
 		statusCode = status[0]
