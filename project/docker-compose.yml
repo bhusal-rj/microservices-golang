@@ -86,3 +86,23 @@ services:
       - "1025:1025"
       - "8025:8025"
 
+  mailer-service:
+    container_name: micro_mailer
+    ports:
+      - "8005:80"
+    depends_on:
+      - mailhog
+    build:
+      context: ../mailer
+      dockerfile: ../mailer/mailer-service.dockerfile
+    restart: always
+    environment:
+     MAIL_DOMAIN: localhost
+     MAIL_HOST: mailhog
+     MAIL_USERNAME: ""
+     MAIL_PASSWORD: ""
+     MAIL_ENCRYPTION: none
+     FROM_NAME: "Rajesh Bhusal"
+     FROM_ADDRESS: rajesh@gmail.com
+     MAIL_PORT: 1025
+
