@@ -169,9 +169,18 @@ func (app *Config) sendMail(w http.ResponseWriter, msg MailPayload) {
 	defer respose.Body.Close()
 
 	var response jsonResponse
+
+	//read the json
+
 	err = json.NewDecoder(respose.Body).Decode(&response)
+
 	if err != nil {
 		app.errorJSON(w, err)
+		return
+	}
+
+	if response.Error {
+		app.errorJSON(w, errors.New(response.Message))
 		return
 	}
 
