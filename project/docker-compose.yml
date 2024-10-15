@@ -116,3 +116,11 @@ services:
     volumes:
       - ./db-data/rabbitmq:/var/lib/rabbitmq/
 
+  listner-service:
+    container_name: micro_listener
+    build:
+      context: ../listener
+      dockerfile: ../listener/listner-service.dockerfile
+    depends_on:
+      - rabbitmq
+      

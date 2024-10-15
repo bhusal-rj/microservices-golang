@@ -11,7 +11,7 @@ up_build:
 	@echo "Stopping the existing docker images"
 	docker compose down
 	@echo "Building the docker images"
-	docker compose up --build -d
+	docker compose build 
 	@echo "Docker images built successfully"
 
 down:
