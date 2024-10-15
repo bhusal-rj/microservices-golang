@@ -7,8 +7,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/bhusal-rj/listner/event"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
+
+type Config struct{}
 
 func main() {
 	//try to connect to rabbitmq
@@ -18,11 +21,22 @@ func main() {
 		os.Exit(1)
 	}
 	defer conn.Close()
-	log.Println("Connected to RabbitMQ")
 
 	//start listening for messages
+	log.Println("Listening for and consuming RabbitMQ messages")
 
-	//watch the queue and cosume events
+	consumer, err := event.NewConsumer(conn)
+	if err != nil {
+		log.Panic("There has been an erro while consuming rabbitmq", consumer)
+		return
+	}
+
+	//watch the queue and consume events
+	err = consumer.Listen([]string{"log.INFO", "log.WARNING", "log.ERROR"})
+	if err != nil {
+		log.Panic("Error while listening to RabbitMQ", err)
+		return
+	}
 }
 
 func connect() (*amqp.Connection, error) {
