@@ -17,6 +17,7 @@ type Consumer struct {
 
 type Payload struct {
 	Name string `json:"name"`
+	Data string `json:"data"`
 }
 
 func NewConsumer(conn *amqp.Connection) (Consumer, error) {
