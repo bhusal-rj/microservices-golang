@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/bhusal-rj/logger/cmd/data"
@@ -19,6 +20,7 @@ func (app *Config) WriteLog(w http.ResponseWriter, r *http.Request) {
 		Name: requestPayload.Name,
 		Data: requestPayload.Data,
 	}
+	fmt.Println("Log entry", event)
 
 	err := app.Models.LogEntry.Insert(event)
 	if err != nil {

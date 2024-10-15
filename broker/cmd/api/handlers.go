@@ -225,6 +225,7 @@ func (app *Config) pushToQueue(name, msg string) error {
 	}
 
 	jsonData, _ := json.Marshal(&payload)
+	fmt.Println("RabbitMQ payload", string(jsonData))
 
 	err = emitter.Push(string(jsonData), "log.INFO")
 	if err != nil {

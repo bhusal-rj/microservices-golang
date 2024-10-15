@@ -4,6 +4,7 @@ import (
 	//advanced messaging queue protocol
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -83,16 +84,20 @@ func (consumer *Consumer) Listen(topics []string) error {
 	go func() {
 		for d := range messages {
 			var payload Payload
-			_ = json.Unmarshal(d.Body, payload)
-			go handlePayload(payload)
+			err = json.Unmarshal(d.Body, &payload)
+			if err != nil {
+				fmt.Println("Unmarshaling error", err)
+			}
+			handlePayload(payload)
 			// var payload Payload
 		}
 	}()
-	log.Printf("Waiting for messages [*] in the queue %s", q.Name, <-forever)
+	log.Print("Waiting for messages [*] in the queue", q.Name, <-forever)
 	return nil
 }
 
 func handlePayload(payload Payload) {
+	fmt.Println("Payload", payload)
 	switch payload.Name {
 	case "log", "event":
 		err := logEvent(payload)

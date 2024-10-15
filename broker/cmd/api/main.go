@@ -17,6 +17,7 @@ type Config struct {
 }
 
 func main() {
+	//connect to RabbitMQ
 	conn, err := connect()
 	if err != nil {
 		log.Panic("Error connecting to the RabbitMQ server", err)
