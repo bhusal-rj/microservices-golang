@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
+	"net/rpc"
 	"os"
 	"time"
 
@@ -15,6 +17,7 @@ import (
 
 // const webPort = "80"
 // const rpcPort = "5001"
+
 // const mongoURL = "mongodb://mongo:27017"
 // const gRpcPort = "50001"
 
@@ -31,6 +34,24 @@ var client *mongo.Client
 
 type Config struct {
 	Models data.Models
+}
+
+func (app *Config) rpcListen() error {
+	log.Println("Starting RPC server on port ", rpcPort)
+	listen, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", rpcPort))
+	if err != nil {
+		return err
+	}
+
+	defer listen.Close()
+
+	for {
+		rpcConn, err := listen.Accept()
+		if err != nil {
+			fmt.Println("There has been an error ", err)
+		}
+		go rpc.ServeConn(rpcConn)
+	}
 }
 
 func main() {
@@ -54,7 +75,18 @@ func main() {
 		Models: data.New(mongoClient),
 	}
 
-	app.serve()
+	//Register the RPC server
+	err := rpc.Register(new(RPCServer))
+
+	if err != nil {
+		fmt.Println("Error connecting to the RPC client", err)
+	}
+	//server for rpc
+	go app.rpcListen()
+
+	//server the logger REST server
+	go app.serve()
+
 }
 
 func (app *Config) serve() {
