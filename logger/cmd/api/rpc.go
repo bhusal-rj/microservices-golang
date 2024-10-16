@@ -20,19 +20,21 @@ type RPCPayload struct {
 }
 
 func (r *RPCServer) LogInfo(payload RPCPayload, resp *string) error {
-	fmt.Println("Logging the result")
+	fmt.Println("Logging the result", payload)
 
-	collection := client.Database("logs").Collection("logs")
+	collection := client.Database("logs").Collection("logger")
 	_, err := collection.InsertOne(context.TODO(), data.LogEntry{
 		Name:      payload.Name,
 		Data:      payload.Data,
 		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	})
 	if err != nil {
 		log.Println("Erroring writing to mongo", err)
 		return err
 	}
 
+	fmt.Println("Log added to the database")
 	*resp = "Processed payload via RPC:" + payload.Name
 	return nil
 }

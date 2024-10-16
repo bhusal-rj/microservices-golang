@@ -74,6 +74,7 @@ func main() {
 			panic(err)
 		}
 	}()
+	client = mongoClient
 
 	log.Print("Mongodb connection successful")
 	app := Config{
@@ -92,7 +93,7 @@ func main() {
 	go app.rpcListen(&wg)
 
 	//server the logger REST server
-	go app.serve(&wg)
+	app.serve(&wg)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)

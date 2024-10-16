@@ -256,7 +256,6 @@ func (app *Config) logItemViaRPC(w http.ResponseWriter, l LogPayload) {
 	}
 
 	var result string
-
 	//name of server for export name should be capital
 	err = client.Call("RPCServer.LogInfo", rpcPayload, &result)
 	if err != nil {
