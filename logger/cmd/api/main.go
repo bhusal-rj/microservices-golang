@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/bhusal-rj/logger/cmd/data"
@@ -36,10 +39,12 @@ type Config struct {
 	Models data.Models
 }
 
-func (app *Config) rpcListen() error {
+func (app *Config) rpcListen(wg *sync.WaitGroup) error {
+	defer wg.Done()
 	log.Println("Starting RPC server on port ", rpcPort)
-	listen, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", rpcPort))
+	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", rpcPort))
 	if err != nil {
+		fmt.Println("There has been an error", err)
 		return err
 	}
 
@@ -62,7 +67,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	defer func() {
 		if err := mongoClient.Disconnect(ctx); err != nil {
@@ -81,15 +86,24 @@ func main() {
 	if err != nil {
 		fmt.Println("Error connecting to the RPC client", err)
 	}
+	var wg sync.WaitGroup
+	wg.Add(2)
 	//server for rpc
-	go app.rpcListen()
+	go app.rpcListen(&wg)
 
 	//server the logger REST server
-	go app.serve()
+	go app.serve(&wg)
 
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+	log.Println("Recevied interrupt signal")
+	wg.Wait()
+	log.Println("Servers shutdown")
 }
 
-func (app *Config) serve() {
+func (app *Config) serve(wg *sync.WaitGroup) {
+	defer wg.Done()
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", webPort),
 		Handler: app.route(),

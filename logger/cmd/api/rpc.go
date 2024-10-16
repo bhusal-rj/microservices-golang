@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/bhusal-rj/logger/cmd/data"
+	"fmt"
 	"log"
 	"time"
+
+	"github.com/bhusal-rj/logger/cmd/data"
 )
 
 // type of RPC server
@@ -18,6 +20,7 @@ type RPCPayload struct {
 }
 
 func (r *RPCServer) LogInfo(payload RPCPayload, resp *string) error {
+	fmt.Println("Logging the result")
 
 	collection := client.Database("logs").Collection("logs")
 	_, err := collection.InsertOne(context.TODO(), data.LogEntry{
