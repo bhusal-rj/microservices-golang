@@ -93,7 +93,9 @@ func main() {
 	go app.rpcListen(&wg)
 
 	//server the logger REST server
-	app.serve(&wg)
+	go app.serve(&wg)
+
+	app.gRPCListen()
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
