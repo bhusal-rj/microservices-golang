@@ -10,6 +10,7 @@
                 <button id="authBrokerBtn" class="btn btn-outline-secondary">Test Auth </button>
                 <button id="logBrokerBtn" class="btn btn-outline-secondary">Test Logger </button>
                 <button id="mailBrokerBtn" class="btn btn-outline-secondary">Test Mail </button>
+                <button id="grpcLogBrokerBtn" class="btn btn-outline-secondary">Test GRPC Logger </button>
                 <div id="output" class="mt-5" style="outline: 1px solid silver; padding: 2em;">
                     <span class="text-muted">Output shows here...</span>
                 </div>
@@ -37,6 +38,8 @@
         let brokerBtn = document.getElementById("brokerBtn")              
         let authBrokerBtn = document.getElementById("authBrokerBtn")              
         let logBrokerBtn = document.getElementById("logBrokerBtn")
+        let grpcLogBrokerBtn = document.getElementById("grpcLogBrokerBtn")
+
         let mailBrokerBtn = document.getElementById("mailBrokerBtn")
         let output = document.getElementById("output")
         let sent = document.getElementById("payload")
@@ -93,6 +96,39 @@
             })
         })
 
+        grpcLogBrokerBtn.addEventListener("click",function(){
+            const payload = {
+                action:"log",
+                log:{
+                    name:"Logging via grpc",
+                    data:"Logging the entry with GRPC",
+                }
+            }
+
+            const headers = new Headers();
+            headers.append("Content-Type","application/json");
+            const body={
+                method:"POST",
+                body: JSON.stringify(payload),
+                headers: headers
+            }
+            fetch("http:\/\/localhost:3004/handle",body).then((response)=> response.json())
+            .then((data)=>{
+                sent.innerHTML = JSON.stringify(payload,undefined,4)
+                received.innerHTML = JSON.stringify(data,undefined,4)
+                if (data.error){
+                output.innerHTML += `<br><strong>Error:</strong> ${data.message}`
+                }else{
+                    output.innerHTML += `<br><strong>Response from authentication service </strong> ${data.message}`
+                }
+            })
+            .catch((err)=>{
+                output.innerHTML += "<br><br>Error:" + err
+            })
+        })
+
+
+
         logBrokerBtn.addEventListener("click",function(){
             const payload = {
                 action:"log",
@@ -123,6 +159,7 @@
                 output.innerHTML += "<br><br>Error:" + err
             })
         })
+        
         mailBrokerBtn.addEventListener("click",function(){
             const payload = {
                 action:"mail",
